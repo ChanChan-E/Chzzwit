@@ -77,22 +77,20 @@ body {
 }
 
 /* ── 레이아웃 ── */
+/* ad-rail은 그리드 밖 position:fixed 요소 — 그리드는 2컬럼만 관리 */
 .layout {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) 220px;
+  grid-template-columns: 260px minmax(0, 1fr);
   gap: 0;
-}
-/* 우측 광고/도네이션 레일: 900px 이하에서 숨김 */
-@media (max-width: 900px) {
-  .layout { grid-template-columns: 260px minmax(0, 1fr); }
-  .ad-rail { display: none; }
 }
 
 /* JS가 제어하는 사이드바 접힘 상태 */
 .layout.sidebar-hidden .sidebar { display: none; }
-.layout.sidebar-hidden { grid-template-columns: minmax(0, 1fr) 220px; }
+.layout.sidebar-hidden { grid-template-columns: minmax(0, 1fr); }
+
+/* 우측 광고/도네이션 레일: 900px 이하에서 숨김 */
 @media (max-width: 900px) {
-  .layout.sidebar-hidden { grid-template-columns: minmax(0, 1fr); }
+  .ad-rail { display: none; }
 }
 
 /* ── 사이드바 ── */
@@ -251,18 +249,19 @@ body {
 .img-lightbox:not([hidden]) { display: flex; }
 .img-lightbox img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: var(--radius); }
 
-/* ── 광고 레일 ── */
+/* ── 광고 레일 (그리드 밖 고정 패널) ── */
 .ad-rail {
-  padding: 18px 14px;
-  display: flex !important; flex-direction: column; gap: 14px; align-items: center;
-  position: fixed !important; /* TODO: 임시 확인용 */
-  right: 0; top: var(--topbar-h);       /* TODO: 임시 확인용 */
-  width: 220px;              /* TODO: 임시 확인용 */
+  position: fixed;
+  right: 0;
+  top: var(--topbar-h);
+  width: 220px;
   height: calc(100vh - var(--topbar-h));
+  display: flex; flex-direction: column; gap: 14px; align-items: center;
+  padding: 18px 14px;
   overflow-y: auto;
   border-left: 1px solid var(--border);
-  background: #8B0000 !important; /* TODO: 디버그 — 우측 사이드바: 진빨 (CSS v4) */
-  z-index: 999;              /* TODO: 임시 확인용 */
+  background: #8B0000; /* TODO: 디버그 — 확인 후 var(--surface)로 교체 */
+  z-index: 5;
 }
 .ad-slot {
   width: 100%; max-width: 200px; aspect-ratio: 1 / 1;
