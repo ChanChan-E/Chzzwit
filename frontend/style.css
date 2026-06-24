@@ -78,7 +78,7 @@ body {
 /* ── 레이아웃 ── */
 .layout {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) 220px;
+  grid-template-columns: 1fr 1fr 1fr;
   height: calc(100vh - var(--topbar-h));
   overflow: hidden;
 }
