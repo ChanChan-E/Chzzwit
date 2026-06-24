@@ -241,7 +241,7 @@ body {
 .img-lightbox img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: var(--radius); }
 
 /* ── 광고 레일 ── */
-.ad-rail {
+.right-panel {
   border-left: 1px solid var(--border);
   background: #00008b;
   padding: 18px 14px;
@@ -251,13 +251,13 @@ body {
   gap: 16px;
   align-items: center;
 }
-.ad-slot {
+.promo-slot {
   width: 100%; max-width: 200px; aspect-ratio: 1 / 1;
   border: 1px dashed var(--border); border-radius: var(--radius);
   display: flex; align-items: center; justify-content: center;
   color: var(--text-dim); font-size: 11px; font-family: var(--font-mono);
 }
-.ad-slot-tall { aspect-ratio: 1 / 2; }
+.promo-slot-tall { aspect-ratio: 1 / 2; }
 
 /* ── 도네이션 카드 ── */
 .donate-card {
