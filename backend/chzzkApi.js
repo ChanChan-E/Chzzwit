@@ -102,10 +102,11 @@ function mapPost(c, channelId) {
   };
 }
 
-// 채널의 VOD를 전체 가져옴 (최대 maxPages 페이지, ChzzOven의 fetchChannelVodsAll과 동일 방식)
-export async function fetchAllChannelVods(channelId, { maxPages = 3, size = 50 } = {}) {
+// 채널의 VOD를 전체 가져옴 (모든 페이지 순회, ChzzOven의 fetchChannelVodsAll과 동일 방식)
+export async function fetchAllChannelVods(channelId, { size = 50 } = {}) {
   const vods = [];
-  for (let page = 0; page < maxPages; page++) {
+  let page = 0;
+  while (true) {
     try {
       const url = `${API_BASE}/channels/${channelId}/videos?page=${page}&size=${size}`;
       const json = await getJson(url);
@@ -113,6 +114,7 @@ export async function fetchAllChannelVods(channelId, { maxPages = 3, size = 50 }
       data.forEach((v) => vods.push(mapVod(v, channelId)));
       const totalPages = json?.content?.totalPages ?? 1;
       if (page + 1 >= totalPages || data.length < size) break;
+      page++;
     } catch (err) {
       console.warn(`[fetchAllChannelVods] ${channelId} page ${page} 실패: ${err.message}`);
       break;
