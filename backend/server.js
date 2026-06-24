@@ -1,7 +1,7 @@
 // server.js
 import express from 'express';
 import cors from 'cors';
-import { searchChannels, getChannelInfo, fetchCommunityPosts, fetchChannelVods } from './chzzkApi.js';
+import { searchChannels, getChannelInfo, fetchCommunityPosts, fetchAllChannelVods } from './chzzkApi.js';
 import { getCachedPosts, setCachedPosts, upsertChannel, getChannel, getCachedVods, setCachedVods } from './store.js';
 
 const app = express();
@@ -93,16 +93,15 @@ async function getPostsWithCache(channelId, offset = 0) {
 }
 
 // ── VOD 피드 조회 ──
+// 채널당 전체 VOD를 캐시해두고 한 번에 반환. 클라이언트가 필터/정렬을 담당.
 app.get('/api/vods', async (req, res) => {
   const idsParam = (req.query.channelIds ?? '').trim();
   if (!idsParam) return res.json({ ok: true, vods: [] });
 
   const channelIds = [...new Set(idsParam.split(',').map((s) => s.trim()).filter(Boolean))];
-  const page = Math.max(0, parseInt(req.query.page, 10) || 0);
-  const size = Math.min(50, Math.max(1, parseInt(req.query.size, 10) || 12));
 
   try {
-    const vodsPerChannel = await fetchVodsPooled(channelIds, page, size);
+    const vodsPerChannel = await fetchVodsPooled(channelIds);
     const merged = vodsPerChannel.flat();
     merged.sort((a, b) => new Date(b.publishDateAt) - new Date(a.publishDateAt));
     res.json({ ok: true, vods: merged });
@@ -111,29 +110,26 @@ app.get('/api/vods', async (req, res) => {
   }
 });
 
-async function fetchVodsPooled(channelIds, page, size) {
+async function fetchVodsPooled(channelIds) {
   const results = new Array(channelIds.length);
   let next = 0;
   async function worker() {
     while (next < channelIds.length) {
       const i = next++;
-      results[i] = await getVodsWithCache(channelIds[i], page, size);
+      results[i] = await getVodsWithCache(channelIds[i]);
     }
   }
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, channelIds.length) }, worker));
   return results;
 }
 
-async function getVodsWithCache(channelId, page, size) {
-  if (page === 0) {
-    const cached = getCachedVods(channelId);
-    const fresh = cached && Date.now() - cached.fetchedAt < VOD_CACHE_TTL;
-    if (fresh) return cached.vods;
-    const vods = await fetchChannelVods(channelId, { page, size });
-    setCachedVods(channelId, vods);
-    return vods;
-  }
-  return fetchChannelVods(channelId, { page, size });
+async function getVodsWithCache(channelId) {
+  const cached = getCachedVods(channelId);
+  const fresh = cached && Date.now() - cached.fetchedAt < VOD_CACHE_TTL;
+  if (fresh) return cached.vods;
+  const vods = await fetchAllChannelVods(channelId);
+  setCachedVods(channelId, vods);
+  return vods;
 }
 
 app.listen(PORT, () => {

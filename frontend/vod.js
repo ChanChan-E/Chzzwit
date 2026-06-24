@@ -1,6 +1,5 @@
 // vod.js
 const STORAGE_KEY = 'cf_channels';
-const PAGE_SIZE = 12;
 
 const els = {
   categoryInput: document.getElementById('vod-category-input'),
@@ -27,10 +26,7 @@ let selectedChannelIds = new Set();
 let allVods = [];
 let extPort = null;
 let isLoading = false;
-let exhausted = false;
-let currentPage = 0;
 let feedVersion = 0;
-let vodObserver = null;
 let viewMode = 'section'; // 'section' | 'grid'
 
 function loadChannels() {
@@ -239,15 +235,12 @@ async function loadVods() {
 
   const version = ++feedVersion;
   isLoading = true;
-  exhausted = false;
-  currentPage = 0;
   allVods = [];
-  if (vodObserver) { vodObserver.disconnect(); vodObserver = null; }
   setVodState('loading');
 
   try {
     const ids = myChannels.map((c) => c.channelId).join(',');
-    const res = await fetch(`${window.BACKEND_URL}/api/vods?channelIds=${encodeURIComponent(ids)}&page=0&size=${PAGE_SIZE}`);
+    const res = await fetch(`${window.BACKEND_URL}/api/vods?channelIds=${encodeURIComponent(ids)}`);
     const json = await res.json();
     if (!json.ok) throw new Error(json.error);
     if (version !== feedVersion) return;
@@ -256,50 +249,11 @@ async function loadVods() {
     buildCategories();
     renderChannelList();
     applyFilters();
-    if (allVods.length >= PAGE_SIZE) setupObserver();
-    else exhausted = true;
   } catch (err) {
     if (version === feedVersion) setVodState('error', err.message);
   } finally {
     isLoading = false;
   }
-}
-
-// ── 무한 스크롤 ──
-function setupObserver() {
-  const sentinel = document.getElementById('vod-sentinel');
-  vodObserver = new IntersectionObserver(async (entries) => {
-    if (!entries[0].isIntersecting || isLoading || exhausted) return;
-    const version = feedVersion;
-    isLoading = true;
-    currentPage++;
-
-    try {
-      const ids = myChannels.map((c) => c.channelId).join(',');
-      const res = await fetch(
-        `${window.BACKEND_URL}/api/vods?channelIds=${encodeURIComponent(ids)}&page=${currentPage}&size=${PAGE_SIZE}`
-      );
-      const json = await res.json();
-      if (!json.ok || version !== feedVersion) return;
-
-      const newVods = json.vods ?? [];
-      if (newVods.length === 0) {
-        exhausted = true;
-        vodObserver.disconnect();
-      } else {
-        allVods = allVods.concat(newVods);
-        buildCategories();
-        renderChannelList();
-        applyFilters();
-        if (newVods.length < PAGE_SIZE) { exhausted = true; vodObserver.disconnect(); }
-      }
-    } catch {
-      showToast('더 불러오지 못했어요');
-    } finally {
-      isLoading = false;
-    }
-  }, { rootMargin: '300px' });
-  vodObserver.observe(sentinel);
 }
 
 // ── 채널 검색 및 추가 (사이드바) ──
