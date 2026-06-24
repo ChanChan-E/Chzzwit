@@ -256,6 +256,7 @@ body {
   height: calc(100vh - 57px);
   overflow-y: auto;
   border-left: 1px solid var(--border);
+  background: red; /* TODO: 임시 확인용 — 확인 후 제거 */
 }
 .ad-slot {
   width: 100%; max-width: 200px; aspect-ratio: 1 / 1;
