@@ -117,12 +117,15 @@ function renderMyChannels() {
 
   myChannels.forEach((ch) => {
     const checked = selectedChannelIds.has(ch.channelId);
+    const count = allPosts.filter((p) => p.channelId === ch.channelId).length;
     const li = document.createElement('li');
+    li.className = 'vod-channel-item';
     li.innerHTML = `
-      <label class="ch-label">
+      <label class="vod-channel-label">
         <input type="checkbox" class="ch-cb" data-id="${ch.channelId}" ${checked ? 'checked' : ''} />
         <img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
-        <span class="ch-name">${escapeHtml(ch.channelName)}</span>
+        <span class="vod-channel-name">${escapeHtml(ch.channelName)}</span>
+        <span class="vod-channel-count">${count || ''}</span>
       </label>
       <button class="ch-remove" data-id="${ch.channelId}" title="목록에서 제거">✕</button>
     `;
