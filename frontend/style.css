@@ -137,6 +137,10 @@ body {
 /* ── 피드 ── */
 .feed-wrap { padding: 18px 20px; border-right: 1px solid var(--border); overflow-y: auto; scrollbar-width: none; }
 .feed-wrap::-webkit-scrollbar { display: none; }
+.sidebar { scrollbar-width: none; }
+.sidebar::-webkit-scrollbar { display: none; }
+.right-panel { scrollbar-width: none; }
+.right-panel::-webkit-scrollbar { display: none; }
 .feed-state { text-align: center; padding: 80px 20px; }
 .feed-state-title { font-size: 15px; font-weight: 600; margin: 0 0 6px; }
 .feed-state-sub { font-size: 13px; color: var(--text-dim); margin: 0; line-height: 1.6; }
@@ -377,7 +381,8 @@ body {
 .ch-remove:hover { color: var(--danger) !important; }
 
 /* VOD 메인 */
-.vod-wrap { padding: 18px 20px; border-right: 1px solid var(--border); overflow-y: auto; }
+.vod-wrap { padding: 18px 20px; border-right: 1px solid var(--border); overflow-y: auto; scrollbar-width: none; }
+.vod-wrap::-webkit-scrollbar { display: none; }
 .vod-grid { list-style: none; margin: 0; padding: 0; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
 .vod-grid:not([hidden]) { display: grid; }
 
