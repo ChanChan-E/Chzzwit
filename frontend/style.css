@@ -544,8 +544,3 @@ body {
   }
 }
 
-@media (max-width: 900px) {
-  .layout { grid-template-columns: 260px minmax(0, 1fr); }
-  .layout.sidebar-hidden { grid-template-columns: minmax(0, 1fr); }
-  .ad-rail { display: none; }
-}
