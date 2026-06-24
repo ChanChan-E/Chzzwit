@@ -249,7 +249,14 @@ body {
 .img-lightbox img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: var(--radius); }
 
 /* ── 광고 레일 ── */
-.ad-rail { padding: 18px 14px; display: flex; flex-direction: column; gap: 14px; align-items: center; }
+.ad-rail {
+  padding: 18px 14px;
+  display: flex; flex-direction: column; gap: 14px; align-items: center;
+  position: sticky; top: 57px;
+  height: calc(100vh - 57px);
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+}
 .ad-slot {
   width: 100%; max-width: 200px; aspect-ratio: 1 / 1;
   border: 1px dashed var(--border); border-radius: var(--radius);
