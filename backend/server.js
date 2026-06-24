@@ -28,6 +28,36 @@ app.get('/api/channels/search', async (req, res) => {
   }
 });
 
+// ── 라이브 상태 일괄 조회 (2분 TTL) ──
+const LIVE_CACHE_TTL = 2 * 60 * 1000;
+const liveCache = new Map(); // channelId → { openLive, fetchedAt }
+
+app.get('/api/channels/live-status', async (req, res) => {
+  const ids = (req.query.channelIds ?? '').split(',').map(s => s.trim()).filter(Boolean);
+  if (!ids.length) return res.json({ ok: true, statuses: [] });
+
+  const now = Date.now();
+  const stale = ids.filter(id => {
+    const c = liveCache.get(id);
+    return !c || now - c.fetchedAt >= LIVE_CACHE_TTL;
+  });
+
+  await Promise.all(stale.map(async (id) => {
+    try {
+      const ch = await getChannelInfo(id);
+      liveCache.set(id, { openLive: ch?.openLive ?? false, fetchedAt: Date.now() });
+    } catch {
+      liveCache.set(id, { openLive: false, fetchedAt: Date.now() });
+    }
+  }));
+
+  const statuses = ids.map(id => ({
+    channelId: id,
+    openLive: liveCache.get(id)?.openLive ?? false,
+  }));
+  res.json({ ok: true, statuses });
+});
+
 // ── 채널 단건 조회 (확장프로그램에서 channelId만 넘어온 경우 등) ──
 app.get('/api/channels/:channelId', async (req, res) => {
   const { channelId } = req.params;

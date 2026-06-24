@@ -367,7 +367,17 @@ body {
   padding: 5px 6px; cursor: pointer; flex: 1; min-width: 0;
 }
 .vod-channel-label input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+.vod-channel-label .ch-avatar-wrap { position: relative; flex-shrink: 0; width: 24px; height: 24px; }
 .vod-channel-label img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: var(--surface); }
+.vod-channel-item.is-live .ch-avatar-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; right: -1px;
+  width: 8px; height: 8px;
+  background: #ff4343;
+  border-radius: 50%;
+  border: 1.5px solid var(--bg);
+}
 .vod-channel-name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vod-channel-count { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); flex-shrink: 0; }
 

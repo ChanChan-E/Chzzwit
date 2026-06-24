@@ -123,7 +123,7 @@ function renderMyChannels() {
     li.innerHTML = `
       <label class="vod-channel-label">
         <input type="checkbox" class="ch-cb" data-id="${ch.channelId}" ${checked ? 'checked' : ''} />
-        <img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
+        <span class="ch-avatar-wrap"><img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" /></span>
         <span class="vod-channel-name">${escapeHtml(ch.channelName)}</span>
         <span class="vod-channel-count">${count || ''}</span>
       </label>
@@ -131,6 +131,29 @@ function renderMyChannels() {
     `;
     els.myChannels.appendChild(li);
   });
+  startLivePolling();
+}
+
+// ── 라이브 상태 표시 ──
+async function updateLiveStatus() {
+  if (!myChannels.length) return;
+  const ids = myChannels.map(ch => ch.channelId).join(',');
+  try {
+    const res = await fetch(`${API_BASE}/api/channels/live-status?channelIds=${ids}`);
+    const json = await res.json();
+    if (!json.ok) return;
+    json.statuses.forEach(({ channelId, openLive }) => {
+      const li = els.myChannels.querySelector(`[data-id="${channelId}"]`)?.closest('.vod-channel-item');
+      if (li) li.classList.toggle('is-live', openLive);
+    });
+  } catch {}
+}
+
+let liveTimer = null;
+function startLivePolling() {
+  updateLiveStatus();
+  clearInterval(liveTimer);
+  liveTimer = setInterval(updateLiveStatus, 2 * 60 * 1000);
 }
 
 els.myChannels.addEventListener('change', (e) => {
