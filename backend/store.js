@@ -10,10 +10,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, 'data');
 const POSTS_FILE = path.join(DATA_DIR, 'posts.json');
 const CHANNELS_FILE = path.join(DATA_DIR, 'channels.json');
+const VODS_FILE = path.join(DATA_DIR, 'vods.json');
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(POSTS_FILE)) fs.writeFileSync(POSTS_FILE, '{}');
 if (!fs.existsSync(CHANNELS_FILE)) fs.writeFileSync(CHANNELS_FILE, '{}');
+if (!fs.existsSync(VODS_FILE)) fs.writeFileSync(VODS_FILE, '{}');
 
 function readJson(file) {
   try {
@@ -53,4 +55,17 @@ export function upsertChannel(channel) {
 export function getChannel(channelId) {
   const all = readJson(CHANNELS_FILE);
   return all[channelId] ?? null;
+}
+
+// ── 채널별 VOD 캐시 ──
+// 구조: { [channelId]: { fetchedAt: number, vods: Vod[] } }
+export function getCachedVods(channelId) {
+  const all = readJson(VODS_FILE);
+  return all[channelId] ?? null;
+}
+
+export function setCachedVods(channelId, vods) {
+  const all = readJson(VODS_FILE);
+  all[channelId] = { fetchedAt: Date.now(), vods };
+  writeJson(VODS_FILE, all);
 }

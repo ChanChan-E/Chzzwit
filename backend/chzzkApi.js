@@ -102,6 +102,32 @@ function mapPost(c, channelId) {
   };
 }
 
+export async function fetchChannelVods(channelId, { page = 0, size = 12 } = {}) {
+  const url = `${API_BASE}/channels/${channelId}/videos?page=${page}&size=${size}`;
+  try {
+    const json = await getJson(url);
+    const list = json?.content?.data ?? [];
+    return list.map((v) => mapVod(v, channelId));
+  } catch (err) {
+    console.warn(`[fetchChannelVods] ${channelId} 실패: ${err.message}`);
+    return [];
+  }
+}
+
+function mapVod(v, channelId) {
+  return {
+    videoNo: String(v.videoNo ?? ''),
+    channelId,
+    title: v.videoTitle ?? '',
+    thumbnailImageUrl: v.thumbnailImageUrl ?? '',
+    duration: v.duration ?? 0,
+    category: v.liveCategoryValue ?? v.categoryType ?? '',
+    publishDateAt: v.publishDateAt ?? null,
+    readCount: v.readCount ?? 0,
+    tags: Array.isArray(v.tags) ? v.tags : [],
+  };
+}
+
 // createdDate 형식: "20260622035800" (YYYYMMDDHHmmss, 로컬시간 추정) → ISO 문자열로 변환
 function parseChzzkDate(raw) {
   if (!raw || raw.length < 14) return null;

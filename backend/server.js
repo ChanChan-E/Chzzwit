@@ -1,12 +1,13 @@
 // server.js
 import express from 'express';
 import cors from 'cors';
-import { searchChannels, getChannelInfo, fetchCommunityPosts } from './chzzkApi.js';
-import { getCachedPosts, setCachedPosts, upsertChannel, getChannel } from './store.js';
+import { searchChannels, getChannelInfo, fetchCommunityPosts, fetchChannelVods } from './chzzkApi.js';
+import { getCachedPosts, setCachedPosts, upsertChannel, getChannel, getCachedVods, setCachedVods } from './store.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 const POST_CACHE_TTL = 10 * 60 * 1000; // 10분 — 같은 채널을 너무 자주 두드리지 않도록 캐싱
+const VOD_CACHE_TTL = 30 * 60 * 1000; // 30분
 
 // ALLOWED_ORIGIN 환경변수 설정 시 해당 도메인만 허용, 미설정 시 전체 허용(개발용)
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN;
@@ -89,6 +90,50 @@ async function getPostsWithCache(channelId, offset = 0) {
     return posts;
   }
   return fetchCommunityPosts(channelId, { limit: 10, offset });
+}
+
+// ── VOD 피드 조회 ──
+app.get('/api/vods', async (req, res) => {
+  const idsParam = (req.query.channelIds ?? '').trim();
+  if (!idsParam) return res.json({ ok: true, vods: [] });
+
+  const channelIds = [...new Set(idsParam.split(',').map((s) => s.trim()).filter(Boolean))];
+  const page = Math.max(0, parseInt(req.query.page, 10) || 0);
+  const size = Math.min(50, Math.max(1, parseInt(req.query.size, 10) || 12));
+
+  try {
+    const vodsPerChannel = await fetchVodsPooled(channelIds, page, size);
+    const merged = vodsPerChannel.flat();
+    merged.sort((a, b) => new Date(b.publishDateAt) - new Date(a.publishDateAt));
+    res.json({ ok: true, vods: merged });
+  } catch (err) {
+    res.status(502).json({ ok: false, error: err.message });
+  }
+});
+
+async function fetchVodsPooled(channelIds, page, size) {
+  const results = new Array(channelIds.length);
+  let next = 0;
+  async function worker() {
+    while (next < channelIds.length) {
+      const i = next++;
+      results[i] = await getVodsWithCache(channelIds[i], page, size);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, channelIds.length) }, worker));
+  return results;
+}
+
+async function getVodsWithCache(channelId, page, size) {
+  if (page === 0) {
+    const cached = getCachedVods(channelId);
+    const fresh = cached && Date.now() - cached.fetchedAt < VOD_CACHE_TTL;
+    if (fresh) return cached.vods;
+    const vods = await fetchChannelVods(channelId, { page, size });
+    setCachedVods(channelId, vods);
+    return vods;
+  }
+  return fetchChannelVods(channelId, { page, size });
 }
 
 app.listen(PORT, () => {
