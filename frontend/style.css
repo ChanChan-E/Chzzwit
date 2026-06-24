@@ -79,7 +79,8 @@ body {
 .layout {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr) 220px;
-  gap: 0;
+  height: calc(100vh - var(--topbar-h));
+  overflow: hidden;
 }
 
 /* JS가 제어하는 사이드바 접힘 상태 */
@@ -90,10 +91,8 @@ body {
 .sidebar {
   border-right: 1px solid var(--border);
   padding: 18px 14px;
-  height: calc(100vh - var(--topbar-h));
-  position: sticky; top: var(--topbar-h);
+  overflow-y: auto;
   display: flex; flex-direction: column; gap: 22px;
-  transition: transform 0.25s ease;
   background: var(--surface);
 }
 .sidebar-section-grow { flex: 1; min-height: 0; display: flex; flex-direction: column; }
@@ -137,7 +136,7 @@ body {
 .vod-channel-list .empty-hint { color: var(--text-dim); font-size: 12.5px; line-height: 1.5; padding: 8px; }
 
 /* ── 피드 ── */
-.feed-wrap { padding: 18px 20px; border-right: 1px solid var(--border); min-height: calc(100vh - var(--topbar-h)); }
+.feed-wrap { padding: 18px 20px; border-right: 1px solid var(--border); overflow-y: auto; }
 .feed-state { text-align: center; padding: 80px 20px; }
 .feed-state-title { font-size: 15px; font-weight: 600; margin: 0 0 6px; }
 .feed-state-sub { font-size: 13px; color: var(--text-dim); margin: 0; line-height: 1.6; }
@@ -247,19 +246,11 @@ body {
   border-left: 1px solid var(--border);
   background: var(--surface);
   padding: 18px 14px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 16px;
   align-items: center;
-}
-.ad-rail-inner {
-  position: sticky;
-  top: var(--topbar-h);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-  width: 100%;
 }
 .ad-slot {
   width: 100%; max-width: 200px; aspect-ratio: 1 / 1;
@@ -386,7 +377,7 @@ body {
 .ch-remove:hover { color: var(--danger) !important; }
 
 /* VOD 메인 */
-.vod-wrap { padding: 18px 20px; border-right: 1px solid var(--border); min-height: calc(100vh - var(--topbar-h)); }
+.vod-wrap { padding: 18px 20px; border-right: 1px solid var(--border); overflow-y: auto; }
 .vod-grid { list-style: none; margin: 0; padding: 0; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
 .vod-grid:not([hidden]) { display: grid; }
 

@@ -428,9 +428,10 @@ async function loadMore() {
 
 function setupFeedObserver() {
   const sentinel = document.getElementById('feed-sentinel');
+  const feedWrap = document.querySelector('.feed-wrap');
   feedObserver = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting && !isLoadingMore) loadMore();
-  }, { rootMargin: '300px' });
+  }, { root: feedWrap, rootMargin: '300px' });
   feedObserver.observe(sentinel);
 }
 
