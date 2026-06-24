@@ -550,7 +550,5 @@ body {
   }
 }
 
-/* ad-rail: .ad-rail base rule(위)보다 뒤에 위치해야 display:none이 flex를 올바르게 덮어씀 */
-@media (max-width: 900px) {
-  .ad-rail { display: none; }
-}
+/* ad-rail: 디버깅 중 — 모든 뷰포트에서 강제 표시 */
+/* TODO: 확인 후 @media (max-width: 900px) { .ad-rail { display: none; } } 복원 */
