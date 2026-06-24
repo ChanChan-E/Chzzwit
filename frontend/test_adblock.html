@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>adblock test</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; }
+
+    .wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      height: 100vh;
+    }
+
+    /* 광고처럼 보이는 이름 vs 무해한 이름 */
+    .col-left  { background: red;   display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; }
+    .col-mid   { background: green; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; }
+    .col-right { background: blue;  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; }
+
+    .ad-rail   { background: blue;  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; }
+    .ad-slot   { background: blue;  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; }
+  </style>
+</head>
+<body>
+
+  <p style="padding:12px;background:#222;color:#fff">
+    아래 두 줄을 비교하세요. col-right(파랑)이 보이고 ad-rail(파랑)이 안 보이면 → 광고 차단 확장프로그램이 원인입니다.
+  </p>
+
+  <!-- 테스트 1: 무해한 이름 -->
+  <p style="padding:8px 12px;background:#333;color:#aaa">테스트 1 — .col-right (무해한 이름)</p>
+  <div class="wrap">
+    <div class="col-left">LEFT</div>
+    <div class="col-mid">CENTER</div>
+    <div class="col-right">RIGHT (.col-right)</div>
+  </div>
+
+  <!-- 테스트 2: 광고처럼 보이는 이름 -->
+  <p style="padding:8px 12px;background:#333;color:#aaa">테스트 2 — .ad-rail (광고처럼 보이는 이름)</p>
+  <div class="wrap">
+    <div class="col-left">LEFT</div>
+    <div class="col-mid">CENTER</div>
+    <div class="ad-rail">RIGHT (.ad-rail)</div>
+  </div>
+
+</body>
+</html>
