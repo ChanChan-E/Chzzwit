@@ -257,6 +257,31 @@ body {
 }
 .ad-slot-tall { aspect-ratio: 1 / 2; }
 
+/* ── 도네이션 카드 ── */
+.donate-card {
+  width: 100%; max-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center;
+}
+.donate-icon { font-size: 28px; line-height: 1; }
+.donate-title { font-size: 13px; font-weight: 600; color: var(--text); margin: 0; }
+.donate-desc { font-size: 11.5px; color: var(--text-dim); margin: 0; line-height: 1.5; }
+.donate-btn {
+  display: block; width: 100%; margin-top: 4px;
+  padding: 8px 0;
+  background: #ff6b35;
+  color: #fff;
+  font-size: 12px; font-weight: 700; font-family: var(--font-ui);
+  text-decoration: none; text-align: center;
+  border-radius: 6px;
+  transition: background 0.15s, transform 0.1s;
+}
+.donate-btn:hover { background: #e85c28; transform: translateY(-1px); }
+
 /* ── 피드 끝 / 추가 로딩 ── */
 .feed-end {
   text-align: center;
