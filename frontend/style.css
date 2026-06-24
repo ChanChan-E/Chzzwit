@@ -135,7 +135,8 @@ body {
 .vod-channel-list .empty-hint { color: var(--text-dim); font-size: 12.5px; line-height: 1.5; padding: 8px; }
 
 /* ── 피드 ── */
-.feed-wrap { padding: 18px 20px; border-right: 1px solid var(--border); overflow-y: auto; }
+.feed-wrap { padding: 18px 20px; border-right: 1px solid var(--border); overflow-y: auto; scrollbar-width: none; }
+.feed-wrap::-webkit-scrollbar { display: none; }
 .feed-state { text-align: center; padding: 80px 20px; }
 .feed-state-title { font-size: 15px; font-weight: 600; margin: 0 0 6px; }
 .feed-state-sub { font-size: 13px; color: var(--text-dim); margin: 0; line-height: 1.6; }
