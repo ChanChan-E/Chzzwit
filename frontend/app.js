@@ -272,14 +272,16 @@ function buildFeedCard(post) {
   li.className = 'feed-card';
   li.innerHTML = `
     <div class="feed-card-head">
-      <img src="${channel?.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
-      <span class="feed-card-name">${escapeHtml(channel?.channelName || '알 수 없는 채널')}</span>
+      <a class="feed-card-channel-link" href="https://chzzk.naver.com/${post.channelId}" target="_blank" rel="noopener noreferrer">
+        <img src="${channel?.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
+        <span class="feed-card-name">${escapeHtml(channel?.channelName || '알 수 없는 채널')}</span>
+      </a>
       <span class="feed-card-time">${formatTime(post.createdAt)}</span>
     </div>
     <div class="feed-card-body">${escapeHtml(post.content)}</div>
     ${buildImageSection(post.imageUrls)}
     <div class="feed-card-meta">
-      <span>💬 ${post.commentCount ?? 0}</span>
+      <a class="meta-comment-link" href="https://chzzk.naver.com/${post.channelId}/community/detail/${post.articleId}" target="_blank" rel="noopener noreferrer">💬 ${post.commentCount ?? 0}</a>
       <span>♥ ${post.likeCount ?? 0}</span>
     </div>
   `;
