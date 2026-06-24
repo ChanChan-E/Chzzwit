@@ -88,11 +88,6 @@ body {
 .layout.sidebar-hidden .sidebar { display: none; }
 .layout.sidebar-hidden { grid-template-columns: minmax(0, 1fr); }
 
-/* 우측 광고/도네이션 레일: 900px 이하에서 숨김 */
-@media (max-width: 900px) {
-  .ad-rail { display: none; }
-}
-
 /* ── 사이드바 ── */
 .sidebar {
   border-right: 1px solid var(--border);
@@ -553,4 +548,9 @@ body {
     display: flex;
     transform: translateX(-100%);
   }
+}
+
+/* ad-rail: .ad-rail base rule(위)보다 뒤에 위치해야 display:none이 flex를 올바르게 덮어씀 */
+@media (max-width: 900px) {
+  .ad-rail { display: none; }
 }
