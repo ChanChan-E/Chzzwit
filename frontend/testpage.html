@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Layout Test</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #eee;
+    }
+
+    /* ── 상단바 ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      height: 58px;
+      background: #1e90ff;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-weight: bold;
+      z-index: 10;
+    }
+
+    /* ── 3컬럼 그리드 ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 220px;
+    }
+
+    /* ── 좌측 사이드바 ── */
+    .sidebar {
+      background: #2d6a2d;
+      padding: 16px;
+      height: calc(100vh - 58px);
+      position: sticky;
+      top: 58px;
+      overflow-y: auto;
+    }
+
+    /* ── 중앙 피드 ── */
+    .feed {
+      background: #222;
+      padding: 16px;
+    }
+
+    /* ── 우측 광고 레일 ── */
+    .ad-rail {
+      background: #6a2d2d;
+      padding: 16px;
+    }
+    .ad-rail-inner {
+      position: sticky;
+      top: 58px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .ad-box {
+      background: #fff2;
+      border: 1px solid #fff4;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">상단바 (파란색)</header>
+
+  <div class="layout">
+
+    <!-- 좌측 사이드바 -->
+    <aside class="sidebar">
+      <p>좌측 사이드바<br>(초록)</p>
+    </aside>
+
+    <!-- 중앙 피드 — 스크롤이 생길 만큼 긴 내용 -->
+    <main class="feed">
+      <p>중앙 피드 (어두운 배경)</p>
+      <div id="cards"></div>
+    </main>
+
+    <!-- 우측 광고 레일 -->
+    <aside class="ad-rail">
+      <div class="ad-rail-inner">
+        <div class="ad-box">☕ 투네이션 카드</div>
+        <div class="ad-box">AD 200×200</div>
+        <div class="ad-box">AD 200×400</div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    // 중앙에 카드 50개 추가해서 스크롤이 충분히 생기도록
+    const cards = document.getElementById('cards');
+    for (let i = 1; i <= 50; i++) {
+      const d = document.createElement('div');
+      d.style.cssText = 'margin:12px 0;padding:16px;background:#333;border-radius:8px;';
+      d.textContent = `피드 카드 #${i}`;
+      cards.appendChild(d);
+    }
+  </script>
+
+</body>
+</html>
