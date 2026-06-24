@@ -6,7 +6,7 @@
   <title>Chzzwit</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-  <link rel="stylesheet" href="style.css?v=6" />
+  <link rel="stylesheet" href="style.css?v=7" />
 </head>
 <body>
   <header class="topbar">
@@ -59,26 +59,26 @@
       </div>
       <div id="feed-error" class="feed-state" hidden>
         <p class="feed-state-title">불러오지 못했어요</p>
-        <p id="feed-error-msg" class="feed-state-sub"></p>
+        <p id="feed-error-msg" class="feed-state-msg"></p>
       </div>
       <ul id="feed-list" class="feed-list" hidden></ul>
       <div id="feed-sentinel"></div>
     </main>
-  </div>
 
-  <!-- 우측: 광고 (그리드 밖 — position:fixed로 독립 배치) -->
-  <aside class="ad-rail">
-    <div class="donate-card">
-      <div class="donate-icon">☕</div>
-      <p class="donate-title">서비스가 도움이 됐나요?</p>
-      <p class="donate-desc">운영비·개발비에 큰 힘이 됩니다.</p>
-      <a class="donate-btn" href="https://toon.at/donate/chanchan2" target="_blank" rel="noopener noreferrer">
-        투네이션으로 응원하기
-      </a>
-    </div>
-    <div class="ad-slot ad-slot-square"><span>AD · 200×200</span></div>
-    <div class="ad-slot ad-slot-tall"><span>AD · 200×400</span></div>
-  </aside>
+    <!-- 우측: 광고 -->
+    <aside class="ad-rail">
+      <div class="donate-card">
+        <div class="donate-icon">☕</div>
+        <p class="donate-title">서비스가 도움이 됐나요?</p>
+        <p class="donate-desc">운영비·개발비에 큰 힘이 됩니다.</p>
+        <a class="donate-btn" href="https://toon.at/donate/chanchan2" target="_blank" rel="noopener noreferrer">
+          투네이션으로 응원하기
+        </a>
+      </div>
+      <div class="ad-slot ad-slot-square"><span>AD · 200×200</span></div>
+      <div class="ad-slot ad-slot-tall"><span>AD · 200×400</span></div>
+    </aside>
+  </div>
 
   <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
   <div id="toast" class="toast" hidden></div>
