@@ -254,6 +254,16 @@ body {
 .meta-comment-link:hover { color: var(--accent); }
 .feed-card-channel-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
 .feed-card-channel-link:hover .feed-card-name { color: var(--accent); }
+.post-link { color: var(--accent); text-decoration: none; word-break: break-all; }
+.post-link:hover { text-decoration: underline; }
+.feed-card-images img { cursor: zoom-in; }
+.img-lightbox {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.88);
+  display: flex; align-items: center; justify-content: center;
+  cursor: zoom-out;
+}
+.img-lightbox img { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: var(--radius); }
 
 /* ── 광고 레일 ── */
 .ad-rail { padding: 18px 14px; display: flex; flex-direction: column; gap: 14px; align-items: center; }

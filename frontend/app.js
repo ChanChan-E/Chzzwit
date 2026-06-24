@@ -167,7 +167,9 @@ document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
 backdrop.addEventListener('click', () => hideSidebar());
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !layout.classList.contains('sidebar-hidden')) hideSidebar();
+  if (e.key !== 'Escape') return;
+  if (!lightbox.hidden) { lightbox.hidden = true; lightboxImg.src = ''; return; }
+  if (!layout.classList.contains('sidebar-hidden')) hideSidebar();
 });
 
 window.addEventListener('resize', () => {
@@ -278,7 +280,7 @@ function buildFeedCard(post) {
       </a>
       <span class="feed-card-time">${formatTime(post.createdAt)}</span>
     </div>
-    <div class="feed-card-body">${escapeHtml(post.content)}</div>
+    <div class="feed-card-body">${linkifyContent(post.content)}</div>
     ${buildImageSection(post.imageUrls)}
     <div class="feed-card-meta">
       <a class="meta-comment-link" href="https://chzzk.naver.com/${post.channelId}/community/detail/${post.articleId}" target="_blank" rel="noopener noreferrer">💬 ${post.commentCount ?? 0}</a>
@@ -452,11 +454,34 @@ els.btnConnectExt.addEventListener('click', () => {
   showToast('확장프로그램에 연결 중…');
 });
 
+// ── 라이트박스 ──
+const lightbox = document.getElementById('img-lightbox');
+const lightboxImg = document.getElementById('img-lightbox-img');
+
+els.feedList.addEventListener('click', (e) => {
+  const img = e.target.closest('.feed-card-images img');
+  if (!img) return;
+  lightboxImg.src = img.src;
+  lightbox.hidden = false;
+});
+
+lightbox.addEventListener('click', () => {
+  lightbox.hidden = true;
+  lightboxImg.src = '';
+});
+
 // ── 유틸 ──
 function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
+}
+function linkifyContent(text) {
+  return String(text ?? '').split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+    i % 2 === 1
+      ? `<a class="post-link" href="${escapeHtml(part)}" target="_blank" rel="noopener noreferrer">${escapeHtml(part)}</a>`
+      : escapeHtml(part)
+  ).join('');
 }
 function formatCount(n) {
   if (n >= 10000) return `${(n / 10000).toFixed(1)}만`;
