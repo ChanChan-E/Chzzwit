@@ -8,10 +8,20 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: sans-serif; }
 
+    .topbar {
+      height: 58px;
+      background: #333;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      color: #fff;
+      font-size: 18px;
+    }
+
     .wrap {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      height: 100vh;
+      grid-template-columns: 260px 1fr 220px;
+      height: calc(100vh - 58px);
     }
     .a { background: red;   display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; }
     .b { background: green; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; }
@@ -19,10 +29,11 @@
   </style>
 </head>
 <body>
+  <header class="topbar">TOPBAR</header>
   <div class="wrap">
-    <div class="a">LEFT</div>
-    <div class="b">CENTER</div>
-    <div class="c">RIGHT</div>
+    <div class="a">LEFT 260px</div>
+    <div class="b">CENTER 1fr</div>
+    <div class="c">RIGHT 220px</div>
   </div>
 </body>
 </html>
