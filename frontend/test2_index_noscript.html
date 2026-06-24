@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test2_index_noscript</title>
+  <link rel="stylesheet" href="style.css?v=13" />
+  <!-- 스크립트 없음 -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; color: #eee; background: #111; }
+
+    .topbar {
+      height: 58px;
+      background: #1a1a6e;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 220px;
+      height: calc(100vh - 58px);
+    }
+    .sidebar   { background: #006400 !important; padding: 16px; overflow-y: auto; }
+    .feed-wrap { background: #4a0000 !important; padding: 16px; overflow-y: auto; }
+    .ad-rail   { background: #00008b !important; padding: 16px; overflow-y: auto; display: flex !important; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>&#9776; &nbsp; Chzzwit</div>
+    <div>VOD | 팔로우 가져오기</div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p>채널 추가</p>
+      <input type="text" placeholder="채널명으로 검색…" style="width:100%;margin-top:8px;padding:6px" />
+    </aside>
+
+    <main class="feed-wrap">
+      <p>피드 영역</p>
+    </main>
+
+    <aside class="ad-rail">
+      <p>☕ 투네이션</p>
+      <p>AD 200×200</p>
+      <p>AD 200×400</p>
+    </aside>
+  </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test2_index_nostyle</title>
+  <!-- style.css 없음 -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; color: #eee; background: #111; }
+
+    .topbar {
+      height: 58px;
+      background: #1a1a6e;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 220px;
+      height: calc(100vh - 58px);
+    }
+    .sidebar   { background: #006400; padding: 16px; overflow-y: auto; }
+    .feed-wrap { background: #4a0000; padding: 16px; overflow-y: auto; }
+    .ad-rail   { background: #00008b; padding: 16px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>&#9776; &nbsp; Chzzwit</div>
+    <div>VOD | 팔로우 가져오기</div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p>채널 추가</p>
+      <input id="channel-search-input" type="text" placeholder="채널명으로 검색…" style="width:100%;margin-top:8px;padding:6px" />
+      <ul id="search-results" hidden></ul>
+      <ul id="my-channels"></ul>
+    </aside>
+
+    <main class="feed-wrap">
+      <div id="feed-empty"><p>아직 추가된 채널이 없어요</p></div>
+      <div id="feed-loading" hidden><p>불러오는 중…</p></div>
+      <div id="feed-error" hidden><p>불러오지 못했어요</p><p id="feed-error-msg"></p></div>
+      <ul id="feed-list" hidden></ul>
+      <div id="feed-sentinel"></div>
+    </main>
+
+    <aside class="ad-rail">
+      <p>☕ 투네이션</p>
+      <p>AD 200×200</p>
+      <p>AD 200×400</p>
+    </aside>
+  </div>
+
+  <div id="sidebar-backdrop"></div>
+  <div id="toast" hidden></div>
+  <div id="img-lightbox" hidden><img id="img-lightbox-img" src="" alt="" /></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
