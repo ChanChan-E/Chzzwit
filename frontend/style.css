@@ -317,12 +317,19 @@ body {
 .topbar-right { display: flex; align-items: center; gap: 8px; }
 .brand { text-decoration: none; color: inherit; }
 
-.vod-filter-select {
+.vod-category-wrap { position: relative; }
+.vod-autocomplete {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  list-style: none; margin: 0; padding: 4px 0;
   background: var(--surface); border: 1px solid var(--border);
-  color: var(--text); padding: 5px 10px;
-  border-radius: var(--radius); font-size: 13px; cursor: pointer;
-  font-family: var(--font-ui);
+  border-radius: var(--radius); z-index: 50;
+  max-height: 220px; overflow-y: auto;
 }
+.vod-autocomplete:not([hidden]) { display: block; }
+.vod-autocomplete li {
+  padding: 7px 12px; font-size: 13px; cursor: pointer;
+}
+.vod-autocomplete li:hover, .vod-autocomplete li.active { background: var(--surface-hover); color: var(--accent); }
 .vod-filter-input {
   flex: 1; background: var(--surface); border: 1px solid var(--border);
   color: var(--text); padding: 5px 12px;

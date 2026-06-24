@@ -18,9 +18,10 @@
       </a>
     </div>
     <div class="topbar-center">
-      <select id="vod-category-select" class="vod-filter-select">
-        <option value="">전체 카테고리</option>
-      </select>
+      <div class="vod-category-wrap">
+        <input id="vod-category-input" class="vod-filter-input" type="text" placeholder="카테고리…" autocomplete="off" />
+        <ul id="vod-category-suggestions" class="vod-autocomplete" hidden></ul>
+      </div>
       <input id="vod-keyword-input" class="vod-filter-input" type="text" placeholder="제목/태그 검색…" autocomplete="off" />
     </div>
     <div class="topbar-right">
@@ -34,13 +35,20 @@
 
   <div class="layout">
     <aside class="sidebar">
+      <div class="sidebar-section">
+        <label class="sidebar-label">채널 추가</label>
+        <div class="search-box">
+          <input id="vod-channel-search-input" type="text" placeholder="채널명으로 검색…" autocomplete="off" />
+        </div>
+        <ul id="vod-search-results" class="search-results" hidden></ul>
+      </div>
       <div class="sidebar-section sidebar-section-grow">
         <div class="sidebar-label-row">
           <label class="sidebar-label">채널 <span id="channel-selected-count" class="mono">0</span> / <span id="channel-total-count" class="mono">0</span></label>
-        </div>
-        <div class="vod-channel-actions">
-          <button id="btn-select-all" class="link-btn">전체선택</button>
-          <button id="btn-deselect-all" class="link-btn">전체해제</button>
+          <div class="vod-channel-actions">
+            <button id="btn-select-all" class="link-btn">전체</button>
+            <button id="btn-deselect-all" class="link-btn">해제</button>
+          </div>
         </div>
         <ul id="vod-channel-list" class="vod-channel-list"></ul>
       </div>

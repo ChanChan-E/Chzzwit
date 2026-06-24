@@ -3,8 +3,11 @@ const STORAGE_KEY = 'cf_channels';
 const PAGE_SIZE = 12;
 
 const els = {
-  categorySelect: document.getElementById('vod-category-select'),
+  categoryInput: document.getElementById('vod-category-input'),
+  categorySuggestions: document.getElementById('vod-category-suggestions'),
   keywordInput: document.getElementById('vod-keyword-input'),
+  channelSearchInput: document.getElementById('vod-channel-search-input'),
+  channelSearchResults: document.getElementById('vod-search-results'),
   channelList: document.getElementById('vod-channel-list'),
   selectedCount: document.getElementById('channel-selected-count'),
   totalCount: document.getElementById('channel-total-count'),
@@ -74,23 +77,60 @@ function renderChannelList() {
   });
 }
 
-// ── 카테고리 드롭다운 ──
-function buildCategorySelect() {
-  const current = els.categorySelect.value;
-  const categories = [...new Set(allVods.map((v) => v.category).filter(Boolean))].sort();
-  els.categorySelect.innerHTML = '<option value="">전체 카테고리</option>';
-  categories.forEach((cat) => {
-    const opt = document.createElement('option');
-    opt.value = cat;
-    opt.textContent = cat;
-    if (cat === current) opt.selected = true;
-    els.categorySelect.appendChild(opt);
-  });
+// ── 카테고리 자동완성 ──
+let allCategories = [];
+let activeCategory = '';
+
+function buildCategories() {
+  allCategories = [...new Set(allVods.map((v) => v.category).filter(Boolean))].sort();
 }
+
+function showCategorySuggestions(query) {
+  const q = query.trim().toLowerCase();
+  const matches = q ? allCategories.filter((c) => c.toLowerCase().includes(q)) : allCategories;
+  els.categorySuggestions.innerHTML = '';
+  if (matches.length === 0) { els.categorySuggestions.hidden = true; return; }
+  matches.forEach((cat) => {
+    const li = document.createElement('li');
+    li.textContent = cat;
+    li.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      activeCategory = cat;
+      els.categoryInput.value = cat;
+      els.categorySuggestions.hidden = true;
+      applyFilters();
+    });
+    els.categorySuggestions.appendChild(li);
+  });
+  els.categorySuggestions.hidden = false;
+}
+
+els.categoryInput.addEventListener('input', () => {
+  activeCategory = '';
+  showCategorySuggestions(els.categoryInput.value);
+});
+els.categoryInput.addEventListener('focus', () => showCategorySuggestions(els.categoryInput.value));
+els.categoryInput.addEventListener('blur', () => {
+  setTimeout(() => { els.categorySuggestions.hidden = true; }, 150);
+  if (!activeCategory) { els.categoryInput.value = ''; applyFilters(); }
+});
+els.categoryInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    activeCategory = '';
+    els.categoryInput.value = '';
+    els.categorySuggestions.hidden = true;
+    applyFilters();
+  }
+});
+document.addEventListener('click', (e) => {
+  if (!els.categoryInput.contains(e.target) && !els.categorySuggestions.contains(e.target)) {
+    els.categorySuggestions.hidden = true;
+  }
+});
 
 // ── 필터링 및 렌더링 ──
 function getFilteredVods() {
-  const category = els.categorySelect.value;
+  const category = activeCategory;
   const keyword = els.keywordInput.value.trim().toLowerCase();
   return allVods.filter((v) => {
     if (!selectedChannelIds.has(v.channelId)) return false;
@@ -172,7 +212,7 @@ async function loadVods() {
     if (version !== feedVersion) return;
 
     allVods = json.vods ?? [];
-    buildCategorySelect();
+    buildCategories();
     renderChannelList();
     applyFilters();
     if (allVods.length >= PAGE_SIZE) setupObserver();
@@ -207,7 +247,7 @@ function setupObserver() {
         vodObserver.disconnect();
       } else {
         allVods = allVods.concat(newVods);
-        buildCategorySelect();
+        buildCategories();
         renderChannelList();
         applyFilters();
         if (newVods.length < PAGE_SIZE) { exhausted = true; vodObserver.disconnect(); }
@@ -220,6 +260,64 @@ function setupObserver() {
   }, { rootMargin: '300px' });
   vodObserver.observe(sentinel);
 }
+
+// ── 채널 검색 및 추가 (사이드바) ──
+let channelSearchTimer = null;
+els.channelSearchInput.addEventListener('input', () => {
+  clearTimeout(channelSearchTimer);
+  const keyword = els.channelSearchInput.value.trim();
+  if (!keyword) { els.channelSearchResults.hidden = true; return; }
+  channelSearchTimer = setTimeout(() => runChannelSearch(keyword), 300);
+});
+
+async function runChannelSearch(keyword) {
+  try {
+    const res = await fetch(`${window.BACKEND_URL}/api/channels/search?keyword=${encodeURIComponent(keyword)}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error);
+    renderChannelSearchResults(json.channels);
+  } catch (err) {
+    showToast(`검색 실패: ${err.message}`);
+  }
+}
+
+function renderChannelSearchResults(channels) {
+  els.channelSearchResults.innerHTML = '';
+  if (channels.length === 0) { els.channelSearchResults.hidden = true; return; }
+  channels.forEach((ch) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
+      <span class="s-name">${escapeHtml(ch.channelName)}</span>
+      <span class="s-follower mono">${formatCount(ch.followerCount)}</span>
+    `;
+    li.addEventListener('click', () => {
+      addChannel(ch);
+      els.channelSearchResults.hidden = true;
+      els.channelSearchInput.value = '';
+    });
+    els.channelSearchResults.appendChild(li);
+  });
+  els.channelSearchResults.hidden = false;
+}
+
+function addChannel(channel) {
+  if (myChannels.some((c) => c.channelId === channel.channelId)) {
+    showToast('이미 추가된 채널이에요');
+    return;
+  }
+  myChannels.push(channel);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(myChannels));
+  selectedChannelIds.add(channel.channelId);
+  showToast(`${channel.channelName} 추가됨`);
+  loadVods();
+}
+
+document.addEventListener('click', (e) => {
+  if (!els.channelSearchResults.contains(e.target) && e.target !== els.channelSearchInput) {
+    els.channelSearchResults.hidden = true;
+  }
+});
 
 // ── 채널 체크박스 이벤트 ──
 els.channelList.addEventListener('change', (e) => {
@@ -244,7 +342,6 @@ els.btnDeselectAll.addEventListener('click', () => {
 });
 
 // ── 필터 이벤트 ──
-els.categorySelect.addEventListener('change', applyFilters);
 let keywordTimer = null;
 els.keywordInput.addEventListener('input', () => {
   clearTimeout(keywordTimer);
