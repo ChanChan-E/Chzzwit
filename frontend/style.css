@@ -404,19 +404,95 @@ body {
 .vod-tag { font-size: 11px; color: var(--text-dim); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; }
 
 /* VOD 섹션 뷰 */
-.vod-sections { list-style: none; margin: 0; padding: 0; flex-direction: column; gap: 28px; }
+.vod-sections { list-style: none; margin: 0; padding: 0; flex-direction: column; gap: 32px; }
 .vod-sections:not([hidden]) { display: flex; }
-.vod-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.vod-section-channel { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text); font-size: 14px; font-weight: 600; }
-.vod-section-channel img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; background: var(--bg); }
+.vod-section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.vod-section-channel { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text); font-size: 14px; font-weight: 600; flex: 1; min-width: 0; }
+.vod-section-channel img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: var(--bg); flex-shrink: 0; }
 .vod-section-channel:hover .vod-section-name { color: var(--accent); }
-.vod-section-count { font-size: 12px; color: var(--text-dim); font-weight: 400; margin-left: 4px; }
-.vod-section-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; }
-.vod-section-row::-webkit-scrollbar { height: 4px; }
-.vod-section-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.vod-section-row .vod-card { flex-shrink: 0; width: 210px; }
-.vod-section.expanded .vod-section-row { overflow-x: visible; flex-wrap: wrap; }
-.vod-section.expanded .vod-section-row .vod-card { flex-shrink: 1; }
+.vod-section-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vod-section-count { font-size: 12px; color: var(--text-dim); font-weight: 400; margin-left: 4px; flex-shrink: 0; }
+
+/* 펼치기/접기 버튼 */
+.vod-section-expand-btn {
+  font-size: 12px; padding: 4px 10px; flex-shrink: 0;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--surface); color: var(--text-dim);
+  cursor: pointer; white-space: nowrap; font-family: var(--font-ui);
+  transition: color 0.12s, border-color 0.12s;
+}
+.vod-section-expand-btn:hover { color: var(--text); border-color: var(--accent); }
+.vod-section-expand-btn.expanded { color: var(--accent); border-color: var(--accent); }
+
+/* 가로 슬라이더 */
+.vod-slider-wrap { position: relative; overflow: hidden; }
+.vod-slider-track {
+  display: flex; gap: 12px;
+  overflow-x: auto; scroll-behavior: smooth;
+  scrollbar-width: none; padding-bottom: 4px;
+}
+.vod-slider-track::-webkit-scrollbar { display: none; }
+.vod-slider-track .vod-card { flex: 0 0 220px; width: 220px; }
+
+/* 슬라이더 좌/우 버튼 */
+.vod-slider-btn {
+  position: absolute; top: 0; bottom: 0; width: 56px;
+  border: none; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; font-weight: 300; z-index: 10;
+  opacity: 0.85; transition: opacity 0.15s;
+}
+.vod-slider-btn:hover { opacity: 1; }
+.vod-slider-btn[hidden] { display: none !important; }
+.vod-slider-btn.prev {
+  left: 0;
+  background: linear-gradient(to right, rgba(14,17,22,0.92) 0%, transparent 100%);
+  justify-content: flex-start; padding-left: 10px;
+}
+.vod-slider-btn.next {
+  right: 0;
+  background: linear-gradient(to left, rgba(14,17,22,0.92) 0%, transparent 100%);
+  justify-content: flex-end; padding-right: 10px;
+}
+
+/* 슬라이더 끝 펼치기 카드 */
+.vod-slider-expand-card {
+  flex: 0 0 220px; width: 220px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  border: 1px dashed var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-dim);
+  cursor: pointer; aspect-ratio: 16/9;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  font-family: var(--font-ui);
+}
+.vod-slider-expand-card:hover { color: var(--accent); border-color: var(--accent); background: rgba(0,240,168,0.06); }
+.vod-expand-icon { font-size: 22px; opacity: 0.6; }
+.vod-expand-label { font-size: 13px; font-weight: 700; }
+.vod-expand-count { font-size: 11px; color: var(--text-dim); }
+
+/* 펼침 그리드 */
+.vod-section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+/* 더보기 버튼 (그리드 안 카드 자리) */
+.vod-section-more-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  border: 1px dashed var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text-dim);
+  cursor: pointer; aspect-ratio: 3/4; font-family: var(--font-ui);
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.vod-section-more-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(0,240,168,0.06); }
+.vod-more-icon { font-size: 26px; opacity: 0.5; }
+.vod-more-label { font-size: 13px; font-weight: 600; }
+.vod-more-count { font-size: 11px; color: var(--text-dim); }
 
 /* ── 모바일 ── */
 @media (max-width: 768px) {

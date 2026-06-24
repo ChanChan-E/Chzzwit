@@ -1,5 +1,7 @@
 // vod.js
 const STORAGE_KEY = 'cf_channels';
+const SLIDER_LIMIT = 30;   // 슬라이더 모드에서 표시하는 최대 카드 수
+const EXPAND_STEP  = 20;   // 펼치기/더보기 1회당 추가 카드 수
 
 const els = {
   categoryInput: document.getElementById('vod-category-input'),
@@ -28,6 +30,7 @@ let extPort = null;
 let isLoading = false;
 let feedVersion = 0;
 let viewMode = 'section'; // 'section' | 'grid'
+let sectionShowCount = new Map(); // channelId → 펼침 카드 수 (0 = 슬라이더)
 
 function loadChannels() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? []; }
@@ -159,35 +162,126 @@ function renderSections(vods) {
   els.vodGrid.className = 'vod-sections';
   els.vodGrid.innerHTML = '';
 
+  let rendered = 0;
   myChannels
     .filter((ch) => selectedChannelIds.has(ch.channelId))
     .forEach((ch) => {
       const chVods = vods.filter((v) => v.channelId === ch.channelId);
       if (chVods.length === 0) return;
-
-      const li = document.createElement('li');
-      li.className = 'vod-section';
-      li.innerHTML = `
-        <div class="vod-section-header">
-          <a class="vod-section-channel" href="https://chzzk.naver.com/${ch.channelId}" target="_blank" rel="noopener noreferrer">
-            <img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
-            <span class="vod-section-name">${escapeHtml(ch.channelName)}</span>
-            <span class="vod-section-count">${chVods.length}개</span>
-          </a>
-          <button class="vod-section-expand link-btn">펼치기</button>
-        </div>
-        <div class="vod-section-row"></div>
-      `;
-      const row = li.querySelector('.vod-section-row');
-      chVods.forEach((v) => row.appendChild(buildVodCard(v)));
-
-      li.querySelector('.vod-section-expand').addEventListener('click', (e) => {
-        const expanded = li.classList.toggle('expanded');
-        e.target.textContent = expanded ? '접기' : '펼치기';
-      });
-
-      els.vodGrid.appendChild(li);
+      const showCount = sectionShowCount.get(ch.channelId) ?? 0;
+      els.vodGrid.appendChild(buildSection(ch, chVods, showCount));
+      rendered++;
     });
+
+  if (rendered === 0) setVodState('empty');
+}
+
+function buildSection(ch, chVods, showCount) {
+  const section = document.createElement('li');
+  section.className = 'vod-section';
+
+  const isExpanded = showCount > 0;
+  const header = document.createElement('div');
+  header.className = 'vod-section-header';
+  header.innerHTML = `
+    <a class="vod-section-channel" href="https://chzzk.naver.com/${ch.channelId}" target="_blank" rel="noopener noreferrer">
+      <img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
+      <span class="vod-section-name">${escapeHtml(ch.channelName)}</span>
+      <span class="vod-section-count">${chVods.length}개</span>
+    </a>
+    <button class="vod-section-expand-btn${isExpanded ? ' expanded' : ''}" data-action="expand" data-id="${ch.channelId}">
+      ${isExpanded ? '접기 ▲' : '펼치기 ▼'}
+    </button>
+  `;
+  section.appendChild(header);
+
+  if (!isExpanded) {
+    const sliderVods = chVods.slice(0, SLIDER_LIMIT);
+    section.appendChild(buildSlider(sliderVods, chVods.length > SLIDER_LIMIT ? ch.channelId : null, chVods.length));
+  } else {
+    const visible = Math.min(showCount, chVods.length);
+    const grid = document.createElement('div');
+    grid.className = 'vod-section-grid';
+    chVods.slice(0, visible).forEach((v) => grid.appendChild(buildVodCard(v)));
+
+    if (visible < chVods.length) {
+      const remaining = chVods.length - visible;
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'vod-section-more-btn';
+      moreBtn.dataset.action = 'more';
+      moreBtn.dataset.id = ch.channelId;
+      moreBtn.innerHTML = `
+        <span class="vod-more-icon">▶</span>
+        <span class="vod-more-label">더 보기</span>
+        <span class="vod-more-count">${remaining}개 남음</span>
+      `;
+      grid.appendChild(moreBtn);
+    }
+    section.appendChild(grid);
+  }
+  return section;
+}
+
+function buildSlider(vods, expandChannelId, totalCount) {
+  const wrap = document.createElement('div');
+  wrap.className = 'vod-slider-wrap';
+
+  const track = document.createElement('div');
+  track.className = 'vod-slider-track';
+  vods.forEach((v) => track.appendChild(buildVodCard(v)));
+
+  if (expandChannelId) {
+    const expandCard = document.createElement('button');
+    expandCard.className = 'vod-slider-expand-card';
+    expandCard.dataset.action = 'expand';
+    expandCard.dataset.id = expandChannelId;
+    expandCard.innerHTML = `
+      <span class="vod-expand-icon">▶</span>
+      <span class="vod-expand-label">펼치기</span>
+      <span class="vod-expand-count">${totalCount}개 보기</span>
+    `;
+    track.appendChild(expandCard);
+  }
+
+  const prevBtn = document.createElement('button');
+  prevBtn.className = 'vod-slider-btn prev';
+  prevBtn.innerHTML = '‹';
+  prevBtn.hidden = true;
+
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'vod-slider-btn next';
+  nextBtn.innerHTML = '›';
+  nextBtn.hidden = vods.length <= 4;
+
+  const scrollAmt = () => track.clientWidth * 0.85;
+
+  prevBtn.addEventListener('click', () => track.scrollBy({ left: -scrollAmt(), behavior: 'smooth' }));
+  nextBtn.addEventListener('click', () => {
+    const isAtEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 10;
+    if (isAtEnd && expandChannelId) {
+      sectionShowCount.set(expandChannelId, EXPAND_STEP);
+      applyFilters();
+      return;
+    }
+    track.scrollBy({ left: scrollAmt(), behavior: 'smooth' });
+  });
+
+  track.addEventListener('scroll', () => {
+    prevBtn.hidden = track.scrollLeft < 10;
+    const isAtEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 10;
+    if (expandChannelId) {
+      nextBtn.innerHTML = isAtEnd ? '펼치기' : '›';
+      nextBtn.style.fontSize = isAtEnd ? '13px' : '';
+      nextBtn.hidden = false;
+    } else {
+      nextBtn.hidden = isAtEnd;
+    }
+  });
+
+  wrap.appendChild(prevBtn);
+  wrap.appendChild(track);
+  wrap.appendChild(nextBtn);
+  return wrap;
 }
 
 function renderGrid(vods) {
@@ -236,6 +330,7 @@ async function loadVods() {
   const version = ++feedVersion;
   isLoading = true;
   allVods = [];
+  sectionShowCount = new Map();
   setVodState('loading');
 
   try {
@@ -334,6 +429,24 @@ els.btnDeselectAll.addEventListener('click', () => {
   selectedChannelIds.clear();
   renderChannelList();
   applyFilters();
+});
+
+// ── 섹션 펼치기/더보기 이벤트 위임 ──
+els.vodGrid.addEventListener('click', (e) => {
+  const expandBtn = e.target.closest('[data-action="expand"]');
+  if (expandBtn) {
+    const id = expandBtn.dataset.id;
+    if ((sectionShowCount.get(id) ?? 0) > 0) sectionShowCount.delete(id);
+    else sectionShowCount.set(id, EXPAND_STEP);
+    applyFilters();
+    return;
+  }
+  const moreBtn = e.target.closest('[data-action="more"]');
+  if (moreBtn) {
+    const id = moreBtn.dataset.id;
+    sectionShowCount.set(id, (sectionShowCount.get(id) ?? EXPAND_STEP) + EXPAND_STEP);
+    applyFilters();
+  }
 });
 
 // ── 뷰 모드 토글 ──
