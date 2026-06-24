@@ -173,7 +173,8 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.feed-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.feed-list { list-style: none; margin: 0; padding: 0; flex-direction: column; gap: 10px; }
+.feed-list:not([hidden]) { display: flex; }
 .feed-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
   padding: 14px 16px;
