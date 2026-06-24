@@ -31,6 +31,7 @@ let exhausted = false;
 let currentPage = 0;
 let feedVersion = 0;
 let vodObserver = null;
+let viewMode = 'section'; // 'section' | 'grid'
 
 function loadChannels() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? []; }
@@ -152,7 +153,45 @@ function applyFilters() {
     if (title) title.textContent = '조건에 맞는 VOD가 없어요';
     return;
   }
-  renderGrid(vods);
+  if (viewMode === 'section') renderSections(vods);
+  else renderGrid(vods);
+}
+
+function renderSections(vods) {
+  if (!vods || vods.length === 0) { setVodState('empty'); return; }
+  setVodState('grid');
+  els.vodGrid.className = 'vod-sections';
+  els.vodGrid.innerHTML = '';
+
+  myChannels
+    .filter((ch) => selectedChannelIds.has(ch.channelId))
+    .forEach((ch) => {
+      const chVods = vods.filter((v) => v.channelId === ch.channelId);
+      if (chVods.length === 0) return;
+
+      const li = document.createElement('li');
+      li.className = 'vod-section';
+      li.innerHTML = `
+        <div class="vod-section-header">
+          <a class="vod-section-channel" href="https://chzzk.naver.com/${ch.channelId}" target="_blank" rel="noopener noreferrer">
+            <img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
+            <span class="vod-section-name">${escapeHtml(ch.channelName)}</span>
+            <span class="vod-section-count">${chVods.length}개</span>
+          </a>
+          <button class="vod-section-expand link-btn">펼치기</button>
+        </div>
+        <div class="vod-section-row"></div>
+      `;
+      const row = li.querySelector('.vod-section-row');
+      chVods.forEach((v) => row.appendChild(buildVodCard(v)));
+
+      li.querySelector('.vod-section-expand').addEventListener('click', (e) => {
+        const expanded = li.classList.toggle('expanded');
+        e.target.textContent = expanded ? '접기' : '펼치기';
+      });
+
+      els.vodGrid.appendChild(li);
+    });
 }
 
 function renderGrid(vods) {
@@ -161,6 +200,7 @@ function renderGrid(vods) {
     return;
   }
   setVodState('grid');
+  els.vodGrid.className = 'vod-grid';
   els.vodGrid.innerHTML = '';
   vods.forEach((v) => els.vodGrid.appendChild(buildVodCard(v)));
 }
@@ -183,6 +223,7 @@ function buildVodCard(v) {
         <span class="vod-channel-name-small">${escapeHtml(ch?.channelName || '')}</span>
       </a>
       <a class="vod-title" href="https://chzzk.naver.com/video/${v.videoNo}" target="_blank" rel="noopener noreferrer">${escapeHtml(v.title)}</a>
+      ${v.tags?.length ? `<div class="vod-tags">${v.tags.map((t) => `<span class="vod-tag">#${escapeHtml(t)}</span>`).join('')}</div>` : ''}
       <div class="vod-meta">
         ${v.category ? `<span class="vod-category">${escapeHtml(v.category)}</span>` : ''}
         <span>${formatCount(v.readCount)} · ${formatDate(v.publishDateAt)}</span>
@@ -338,6 +379,22 @@ els.btnSelectAll.addEventListener('click', () => {
 els.btnDeselectAll.addEventListener('click', () => {
   selectedChannelIds.clear();
   renderChannelList();
+  applyFilters();
+});
+
+// ── 뷰 모드 토글 ──
+document.getElementById('btn-view-section').addEventListener('click', () => {
+  if (viewMode === 'section') return;
+  viewMode = 'section';
+  document.getElementById('btn-view-section').classList.add('active');
+  document.getElementById('btn-view-grid').classList.remove('active');
+  applyFilters();
+});
+document.getElementById('btn-view-grid').addEventListener('click', () => {
+  if (viewMode === 'grid') return;
+  viewMode = 'grid';
+  document.getElementById('btn-view-grid').classList.add('active');
+  document.getElementById('btn-view-section').classList.remove('active');
   applyFilters();
 });
 

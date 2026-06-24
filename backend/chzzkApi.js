@@ -121,7 +121,7 @@ function mapVod(v, channelId) {
     title: v.videoTitle ?? '',
     thumbnailImageUrl: v.thumbnailImageUrl ?? '',
     duration: v.duration ?? 0,
-    category: v.liveCategoryValue ?? v.categoryType ?? '',
+    category: v.liveCategoryValue ?? '',
     publishDateAt: v.publishDateAt ?? null,
     readCount: v.readCount ?? 0,
     tags: Array.isArray(v.tags) ? v.tags : [],
