@@ -78,9 +78,8 @@ body {
 /* ── 레이아웃 ── */
 .layout {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  height: calc(100vh - var(--topbar-h));
-  overflow: hidden;
+  grid-template-columns: 260px minmax(0, 1fr) 220px;
+  height: calc(100vh - 58px);
 }
 
 /* JS가 제어하는 사이드바 접힘 상태 */
@@ -517,11 +516,12 @@ body {
   .btn-ext-text { display: none; }
   .btn-ext { padding: 8px 12px; }
 
-  /* 레이아웃: 항상 단일 컬럼, 사이드바는 overlay */
+  /* 레이아웃: 단일 컬럼, 사이드바는 overlay, 우측 레일 숨김 */
   .layout,
   .layout.sidebar-hidden {
     grid-template-columns: 1fr;
   }
+  .ad-rail { display: none; }
 
   /* 사이드바: fixed overlay drawer */
   .sidebar {
