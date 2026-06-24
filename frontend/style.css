@@ -251,13 +251,15 @@ body {
 /* ── 광고 레일 ── */
 .ad-rail {
   padding: 18px 14px;
-  display: flex; flex-direction: column; gap: 14px; align-items: center;
-  position: sticky; top: 57px;
+  display: flex !important; flex-direction: column; gap: 14px; align-items: center;
+  position: fixed !important; /* TODO: 임시 확인용 */
+  right: 0; top: 57px;       /* TODO: 임시 확인용 */
+  width: 220px;              /* TODO: 임시 확인용 */
   height: calc(100vh - 57px);
   overflow-y: auto;
   border-left: 1px solid var(--border);
-  background: red !important; /* TODO: 임시 확인용 — 확인 후 제거 */
-  display: flex !important;  /* TODO: 임시 확인용 — 확인 후 제거 */
+  background: red !important; /* TODO: 임시 확인용 */
+  z-index: 999;              /* TODO: 임시 확인용 */
 }
 .ad-slot {
   width: 100%; max-width: 200px; aspect-ratio: 1 / 1;
