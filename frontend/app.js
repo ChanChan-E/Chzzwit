@@ -1,13 +1,16 @@
 // app.js
 const STORAGE_KEY = 'cf_channels';
+const SELECTED_KEY = 'cf_selected_channels';
 const PAGE_SIZE = 10;
 
 const els = {
   searchInput: document.getElementById('channel-search-input'),
   searchResults: document.getElementById('search-results'),
   myChannels: document.getElementById('my-channels'),
-  channelCount: document.getElementById('channel-count'),
-  btnClear: document.getElementById('btn-clear-channels'),
+  channelSelectedCount: document.getElementById('channel-selected-count'),
+  channelTotalCount: document.getElementById('channel-total-count'),
+  btnSelectAll: document.getElementById('btn-select-all-ch'),
+  btnDeselectAll: document.getElementById('btn-deselect-all-ch'),
   btnConnectExt: document.getElementById('btn-connect-ext'),
   feedEmpty: document.getElementById('feed-empty'),
   feedLoading: document.getElementById('feed-loading'),
@@ -28,7 +31,20 @@ function loadChannels() {
 function saveChannels(list) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
+function loadSelectedIds(channels) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SELECTED_KEY));
+    if (Array.isArray(saved)) return new Set(saved);
+  } catch {}
+  // 기본값: 전체 선택
+  return new Set(channels.map((c) => c.channelId));
+}
+function saveSelectedIds() {
+  localStorage.setItem(SELECTED_KEY, JSON.stringify([...selectedChannelIds]));
+}
+
 let myChannels = loadChannels();
+let selectedChannelIds = loadSelectedIds(myChannels);
 
 // ── 페이지네이션 상태 ──
 let channelOffsets = {};   // { channelId: number }
@@ -63,11 +79,13 @@ function applyFollowings(channels) {
   channels.forEach((ch) => {
     if (!myChannels.some((c) => c.channelId === ch.channelId)) {
       myChannels.push(ch);
+      selectedChannelIds.add(ch.channelId);
     }
   });
   const addedCount = myChannels.length - before;
   if (addedCount > 0) {
     saveChannels(myChannels);
+    saveSelectedIds();
     renderMyChannels();
     loadFeed();
     showToast(`팔로우 채널 ${addedCount}개 추가됨`);
@@ -85,7 +103,8 @@ function showToast(msg, ms = 2600) {
 
 // ── 사이드바: 내 채널 목록 렌더 ──
 function renderMyChannels() {
-  els.channelCount.textContent = myChannels.length;
+  els.channelTotalCount.textContent = myChannels.length;
+  els.channelSelectedCount.textContent = selectedChannelIds.size;
   els.myChannels.innerHTML = '';
 
   if (myChannels.length === 0) {
@@ -97,15 +116,29 @@ function renderMyChannels() {
   }
 
   myChannels.forEach((ch) => {
+    const checked = selectedChannelIds.has(ch.channelId);
     const li = document.createElement('li');
     li.innerHTML = `
-      <img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
-      <span class="ch-name">${escapeHtml(ch.channelName)}</span>
-      <button class="ch-remove" data-id="${ch.channelId}" title="제거">✕</button>
+      <label class="ch-label">
+        <input type="checkbox" class="ch-cb" data-id="${ch.channelId}" ${checked ? 'checked' : ''} />
+        <img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
+        <span class="ch-name">${escapeHtml(ch.channelName)}</span>
+      </label>
+      <button class="ch-remove" data-id="${ch.channelId}" title="목록에서 제거">✕</button>
     `;
     els.myChannels.appendChild(li);
   });
 }
+
+els.myChannels.addEventListener('change', (e) => {
+  const cb = e.target.closest('.ch-cb');
+  if (!cb) return;
+  if (cb.checked) selectedChannelIds.add(cb.dataset.id);
+  else selectedChannelIds.delete(cb.dataset.id);
+  saveSelectedIds();
+  els.channelSelectedCount.textContent = selectedChannelIds.size;
+  loadFeed();
+});
 
 els.myChannels.addEventListener('click', (e) => {
   const btn = e.target.closest('.ch-remove');
@@ -113,10 +146,26 @@ els.myChannels.addEventListener('click', (e) => {
   removeChannel(btn.dataset.id);
 });
 
+els.btnSelectAll.addEventListener('click', () => {
+  selectedChannelIds = new Set(myChannels.map((c) => c.channelId));
+  saveSelectedIds();
+  renderMyChannels();
+  loadFeed();
+});
+
+els.btnDeselectAll.addEventListener('click', () => {
+  selectedChannelIds.clear();
+  saveSelectedIds();
+  renderMyChannels();
+  loadFeed();
+});
+
 function addChannel(channel) {
   if (myChannels.some((c) => c.channelId === channel.channelId)) return false;
   myChannels.push(channel);
+  selectedChannelIds.add(channel.channelId);
   saveChannels(myChannels);
+  saveSelectedIds();
   renderMyChannels();
   loadFeed();
   return true;
@@ -124,18 +173,12 @@ function addChannel(channel) {
 
 function removeChannel(channelId) {
   myChannels = myChannels.filter((c) => c.channelId !== channelId);
+  selectedChannelIds.delete(channelId);
   saveChannels(myChannels);
+  saveSelectedIds();
   renderMyChannels();
   loadFeed();
 }
-
-els.btnClear.addEventListener('click', () => {
-  if (myChannels.length === 0) return;
-  myChannels = [];
-  saveChannels(myChannels);
-  renderMyChannels();
-  loadFeed();
-});
 
 // ── 사이드바 토글 ──
 const layout = document.querySelector('.layout');
@@ -300,14 +343,15 @@ async function loadFeed() {
   if (feedObserver) { feedObserver.disconnect(); feedObserver = null; }
   removeFeedEnd();
 
-  if (myChannels.length === 0) {
+  const activeChannelIds = myChannels.filter((c) => selectedChannelIds.has(c.channelId));
+  if (myChannels.length === 0 || activeChannelIds.length === 0) {
     setFeedState('empty');
     return;
   }
 
   setFeedState('loading');
   try {
-    const ids = myChannels.map((c) => c.channelId).join(',');
+    const ids = activeChannelIds.map((c) => c.channelId).join(',');
     const res = await fetch(`${window.BACKEND_URL}/api/feed?channelIds=${encodeURIComponent(ids)}`);
     const json = await res.json();
     if (!json.ok) throw new Error(json.error);
@@ -319,12 +363,12 @@ async function loadFeed() {
     // 채널별 offset 세팅 및 첫 페이지에서 이미 exhausted된 채널 표시
     const countPerChannel = {};
     allPosts.forEach((p) => { countPerChannel[p.channelId] = (countPerChannel[p.channelId] || 0) + 1; });
-    myChannels.forEach((c) => {
+    activeChannelIds.forEach((c) => {
       channelOffsets[c.channelId] = PAGE_SIZE;
       if ((countPerChannel[c.channelId] ?? 0) < PAGE_SIZE) exhausted[c.channelId] = true;
     });
 
-    if (myChannels.every((c) => exhausted[c.channelId])) {
+    if (activeChannelIds.every((c) => exhausted[c.channelId])) {
       showFeedEnd();
     } else {
       setupFeedObserver();
@@ -337,7 +381,7 @@ async function loadFeed() {
 // ── 무한 스크롤: 다음 페이지 로드 ──
 async function loadMore() {
   const version = feedVersion;
-  const activeChannels = myChannels.filter((c) => !exhausted[c.channelId]);
+  const activeChannels = myChannels.filter((c) => selectedChannelIds.has(c.channelId) && !exhausted[c.channelId]);
   if (activeChannels.length === 0 || isLoadingMore) return;
 
   isLoadingMore = true;
@@ -367,7 +411,7 @@ async function loadMore() {
       activeChannels.forEach((c) => { exhausted[c.channelId] = true; });
     }
 
-    if (myChannels.every((c) => exhausted[c.channelId])) {
+    if (myChannels.filter((c) => selectedChannelIds.has(c.channelId)).every((c) => exhausted[c.channelId])) {
       showFeedEnd();
       if (feedObserver) { feedObserver.disconnect(); feedObserver = null; }
     }
