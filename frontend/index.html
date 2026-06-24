@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHZZK FEED</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <button id="btn-toggle-sidebar" class="btn-sidebar-toggle" aria-label="사이드바">&#9776;</button>
+      <span class="brand-mark"></span>
+      <span class="brand-text">CHZZK<strong>FEED</strong></span>
+    </div>
+    <button id="btn-connect-ext" class="btn-ext" aria-label="확장프로그램으로 팔로우 가져오기">
+      <span class="btn-ext-dot"></span>
+      <span class="btn-ext-text">확장프로그램으로 팔로우 가져오기</span>
+    </button>
+  </header>
+
+  <div class="layout">
+    <!-- 좌측: 채널 검색/추가 -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <label class="sidebar-label">채널 추가</label>
+        <div class="search-box">
+          <input id="channel-search-input" type="text" placeholder="채널명으로 검색…" autocomplete="off" />
+        </div>
+        <ul id="search-results" class="search-results" hidden></ul>
+      </div>
+
+      <div class="sidebar-section sidebar-section-grow">
+        <div class="sidebar-label-row">
+          <label class="sidebar-label">내 채널 <span id="channel-count" class="mono">0</span></label>
+          <button id="btn-clear-channels" class="link-btn">전체 해제</button>
+        </div>
+        <ul id="my-channels" class="my-channels">
+          <li class="empty-hint">검색해서 채널을 추가하거나,<br />확장프로그램으로 팔로우를 가져와보세요.</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- 중앙: 피드 -->
+    <main class="feed-wrap">
+      <div id="feed-empty" class="feed-state">
+        <p class="feed-state-title">아직 추가된 채널이 없어요</p>
+        <p class="feed-state-sub">왼쪽에서 채널을 검색해 추가하면 커뮤니티 글이 여기 모여요.</p>
+      </div>
+      <div id="feed-loading" class="feed-state" hidden>
+        <div class="spinner"></div>
+        <p class="feed-state-sub">피드를 불러오는 중…</p>
+      </div>
+      <div id="feed-error" class="feed-state" hidden>
+        <p class="feed-state-title">불러오지 못했어요</p>
+        <p id="feed-error-msg" class="feed-state-sub"></p>
+      </div>
+      <ul id="feed-list" class="feed-list" hidden></ul>
+      <div id="feed-sentinel"></div>
+    </main>
+
+    <!-- 우측: 광고 -->
+    <aside class="ad-rail">
+      <div class="ad-slot ad-slot-square"><span>AD · 200×200</span></div>
+      <div class="ad-slot ad-slot-tall"><span>AD · 200×400</span></div>
+    </aside>
+  </div>
+
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

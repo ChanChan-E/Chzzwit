@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Chwitter",
+  "version": "1.0.0",
+  "description": "치지직 팔로우 채널 피드 — chzzk-feed-mvp 연동",
+  "permissions": ["tabs", "scripting", "storage"],
+  "host_permissions": [
+    "https://chzzk.naver.com/*",
+    "https://api.chzzk.naver.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:*/*",
+      "https://YOUR-DOMAIN.com/*"
+    ]
+  },
+  "action": {
+    "default_title": "Chwitter 열기"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
