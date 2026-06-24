@@ -88,36 +88,5 @@
 
   <script src="config.js"></script>
   <script src="app.js"></script>
-  <script>
-  /* ── 디버그: 매 로드마다 ad-rail에 랜덤 색상 + 프레임명 표시 ── */
-  (function() {
-    var frames = [
-      { color: '#e74c3c', name: 'FRAME-RED' },
-      { color: '#3498db', name: 'FRAME-BLUE' },
-      { color: '#27ae60', name: 'FRAME-GREEN' },
-      { color: '#f39c12', name: 'FRAME-ORANGE' },
-      { color: '#8e44ad', name: 'FRAME-PURPLE' },
-      { color: '#16a085', name: 'FRAME-TEAL' },
-      { color: '#e91e63', name: 'FRAME-PINK' },
-      { color: '#ff5722', name: 'FRAME-DEEPORG' },
-    ];
-    var f = frames[Math.floor(Math.random() * frames.length)];
-    var rail = document.querySelector('.ad-rail');
-    if (!rail) { console.warn('[debug] .ad-rail 요소를 찾을 수 없음'); return; }
-    rail.style.setProperty('background', f.color, 'important');
-    rail.style.setProperty('display', 'flex', 'important');
-    rail.style.setProperty('position', 'fixed', 'important');
-    rail.style.setProperty('right', '0', 'important');
-    rail.style.setProperty('top', 'var(--topbar-h, 58px)', 'important');
-    rail.style.setProperty('width', '220px', 'important');
-    rail.style.setProperty('height', 'calc(100vh - var(--topbar-h, 58px))', 'important');
-    rail.style.setProperty('z-index', '9999', 'important');
-    var lbl = document.createElement('div');
-    lbl.textContent = f.name;
-    lbl.style.cssText = 'background:rgba(0,0,0,.7);color:#fff;font:bold 12px monospace;padding:4px 8px;text-align:center;width:100%;box-sizing:border-box;';
-    rail.insertBefore(lbl, rail.firstChild);
-    console.log('[debug] ad-rail color:', f.name);
-  })();
-  </script>
 </body>
 </html>
