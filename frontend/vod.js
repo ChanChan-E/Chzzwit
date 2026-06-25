@@ -68,10 +68,11 @@ function renderChannelList() {
     li.innerHTML = `
       <label class="vod-channel-label">
         <input type="checkbox" class="vod-channel-cb" data-id="${ch.channelId}" ${checked ? 'checked' : ''} />
-        <img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" />
+        <span class="ch-avatar-wrap"><img src="${ch.channelImageUrl || ''}" alt="" onerror="this.style.visibility='hidden'" /></span>
         <span class="vod-channel-name">${escapeHtml(ch.channelName)}</span>
         <span class="vod-channel-count">${count}</span>
       </label>
+      <button class="ch-remove" data-id="${ch.channelId}" title="목록에서 제거">✕</button>
     `;
     els.channelList.appendChild(li);
   });
@@ -407,6 +408,21 @@ document.addEventListener('click', (e) => {
   if (!els.channelSearchResults.contains(e.target) && e.target !== els.channelSearchInput) {
     els.channelSearchResults.hidden = true;
   }
+});
+
+// ── 채널 제거 ──
+function removeChannel(channelId) {
+  myChannels = myChannels.filter((c) => c.channelId !== channelId);
+  selectedChannelIds.delete(channelId);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(myChannels));
+  renderChannelList();
+  loadVods();
+}
+
+els.channelList.addEventListener('click', (e) => {
+  const btn = e.target.closest('.ch-remove');
+  if (!btn) return;
+  removeChannel(btn.dataset.id);
 });
 
 // ── 채널 체크박스 이벤트 ──
